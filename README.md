@@ -58,5 +58,5 @@ npm install
 
 ```bash
 Email: john@demo.com
-Password: Demo@123
+Password: Demo@123,demo
 ```
