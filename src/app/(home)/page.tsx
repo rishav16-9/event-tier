@@ -1,7 +1,10 @@
-import { client } from "@/lib/client";
-import { HomeView } from "@/module/home/ui/views/home-view";
-import { currentUser } from "@clerk/nextjs/server";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { ErrorBoundary } from "react-error-boundary";
+import { currentUser } from "@clerk/nextjs/server";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { HomeView } from "@/module/home/ui/views/home-view";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 const Page = async () => {
   const user = await currentUser();
@@ -9,16 +12,16 @@ const Page = async () => {
     redirect("/sign-in");
   }
 
-  const userTier = (user.unsafeMetadata?.tier as string) || "free";
-  const { data: eventss, error } = await client
-    .from("events")
-    .select("*")
-    .eq("tier", userTier);
-  console.log(error);
+  const queryClient = getQueryClient();
+  void queryClient.prefetchQuery(trpc.event.getMany.queryOptions());
   return (
-    <div>
-      <HomeView data={eventss} />
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <Suspense fallback={<p>Loading ...</p>}>
+        <ErrorBoundary fallback={<p>Error...</p>}>
+          <HomeView />
+        </ErrorBoundary>
+      </Suspense>
+    </HydrationBoundary>
   );
 };
 
