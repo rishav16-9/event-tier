@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export const Navbar = () => {
   return (
-    <nav className="h-16 flex items-center  px-4 bg-white border-b">
+    <nav className="h-16 flex items-center p-4 bg-white border-b">
       <div className="max-w-5xl mx-auto w-full flex justify-between items-center">
         <Link href="/">
           <p className="text-3xl font-semibold ">Event</p>
