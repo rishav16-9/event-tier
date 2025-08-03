@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎟️ Event Tier Showcase
 
-## Getting Started
+**Event Tier Showcase** is a full-stack web app built with Next.js 14 (App Router), Clerk.dev authentication, Supabase PostgreSQL, tRPC, TanStack Query, and Tailwind CSS. It showcases events that are restricted by user tier—Free, Silver, Gold, or Platinum.
 
-First, run the development server:
+## 🚀 Features
+
+- 🎫 User sign-up & login using Clerk
+- 🧾 Tier stored in Clerk metadata (free by default)
+- 📊 Supabase table `events` with tier-based access (Free, Silver, Gold, Platinum)
+- ⚙️ TRPC endpoints:
+  - `getMany` to fetch events by tier
+  - `updateTier` mutation to upgrade user tier
+- 📦 React Query + Suspense for smooth loading & cache
+- 🎨 Tailwind-styled responsive UI, with upgrade buttons and tiered event cards
+
+## 🧱 Tech Stack
+
+| Layer      | Tool                    |
+| ---------- | ----------------------- |
+| Frontend   | Next.js 14 (App Router) |
+| Auth       | Clerk.dev               |
+| Database   | Supabase PostgreSQL     |
+| API layers | tRPC + TanStack Query   |
+| Styling    | Tailwind CSS            |
+
+## 🛠️ Setup Instructions
+
+### 1. Clone repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/rishav16-9/event-tier.git
+cd event-tier
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependency
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🧩 Usage flow
 
-## Learn More
+- Users sign up/sign in via Clerk.
 
-To learn more about Next.js, take a look at the following resources:
+- Profile includes tier = free by default.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- On Events page:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Users see events matching their tier.
 
-## Deploy on Vercel
+- If in Free tier, only Free events show.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Button to upgrade (to Silver → Gold → Platinum).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- After upgrade, UI instantly updates events and buttons.
+
+### 👩‍💻 Demo user credential
+
+```bash
+Email: john@demo.com
+Password: Demo@123
+```
