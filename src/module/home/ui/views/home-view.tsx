@@ -1,50 +1,59 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
-import { TierData } from "../components/tier-data";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { TierData } from "../components/tier-data";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
 
-interface Props {
-  data: any;
-}
+const tiers = ["free", "silver", "gold", "platinum"] as const;
+type Tier = (typeof tiers)[number];
 
-const tiers = ["free", "silver", "gold", "platinum"];
+export const HomeView = () => {
+  const trpc = useTRPC();
 
-export const HomeView = ({ data }: Props) => {
-  const router = useRouter();
   const { user } = useUser();
-  const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useSuspenseQuery(
+    trpc.event.getMany.queryOptions()
+  );
+
+  const updateTier = useMutation(
+    trpc.event.updateTier.mutationOptions({
+      onSuccess: async () => {
+        queryClient.invalidateQueries(trpc.event.getMany.queryOptions());
+        if (user) {
+          await user?.reload();
+        }
+        toast.success("Event upgraded");
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    })
+  );
   if (!user) return null;
 
   // const currentTier = user.publicMetadata?.tier as string;
-  const currentTier = user.unsafeMetadata?.tier as string;
+  const currentTier = user.publicMetadata?.tier as Tier;
 
   // get the higher tier
-
   const updradeOption = tiers.slice(tiers.indexOf(currentTier) + 1);
 
-  const handleUpgrade = async (tier: string) => {
-    setLoading(true);
-    try {
-      await user?.update({
-        unsafeMetadata: { tier },
-      });
-      router.refresh();
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
-  };
-
+  const disable = isLoading || updateTier.isPending;
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-y-6 py-2">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-y-1">
           <h1 className="text-2xl font-semibold">Welcome to the Event</h1>
           <p className="text-sm text-muted-foreground">
-            {`Event based on your ${user?.unsafeMetadata?.tier} tier`}
+            {`Event based on your ${currentTier} tier`}
           </p>
         </div>
         <div className="flex flex-col gap-y-1">
@@ -58,8 +67,8 @@ export const HomeView = ({ data }: Props) => {
                   key={tier}
                   size="sm"
                   variant="outline"
-                  disabled={loading}
-                  onClick={() => handleUpgrade(tier)}
+                  disabled={disable}
+                  onClick={() => updateTier.mutate({ tier })}
                 >
                   {tier.charAt(0).toUpperCase() + tier.slice(1)}
                 </Button>
@@ -80,6 +89,7 @@ export const HomeView = ({ data }: Props) => {
             description={event?.description}
             image={event?.image_url}
             date={event?.event_date}
+            tier={currentTier}
           />
         ))}
       </div>
